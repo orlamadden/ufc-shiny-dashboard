@@ -10,7 +10,12 @@ elo_df <- read_csv("https://raw.githubusercontent.com/andrew-couch/Tidy-Tuesday/
 
 ui <- dashboardPage(
     dashboardHeader(title = "UFC Dashboard"),
-    dashboardSidebar(),
+    dashboardSidebar(
+        sidebarMenu(
+            menuItem("Weight Class", tabName = "weight_class_tab", icon = icon("dashboard")),
+            menuItem("Head to head", tabName = "head_tab", icon = icon("mitten"))
+        )
+    ),
     dashboardBody()
     
 )
