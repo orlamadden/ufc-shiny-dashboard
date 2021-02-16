@@ -26,6 +26,8 @@ create_elo_data <- function(k) {
 
 }
 
+create_elo_data(20)
+
 ui <- dashboardPage(
     dashboardHeader(title = "UFC Dashboard"),
     dashboardSidebar(
@@ -36,7 +38,13 @@ ui <- dashboardPage(
     ),
     dashboardBody(
         tabItems(
-            tabItem(tabName = "weight_class_tab"),
+            tabItem(tabName = "weight_class_tab",
+                    box(sliderInput(inputId = "v_k_1",
+                                    label = "K for ELO",
+                                    min = 1,
+                                    max = 100,
+                                    value = 20)
+                        )),
             tabItem(tabName = "head_tab")
         )
     )
