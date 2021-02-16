@@ -8,10 +8,23 @@ library(readr)
 df <- read_csv("https://raw.githubusercontent.com/andrew-couch/Tidy-Tuesday/master/TidyTuesdayUFCDashboard/elo.csv")
 elo_df <- read_csv("https://raw.githubusercontent.com/andrew-couch/Tidy-Tuesday/master/TidyTuesdayUFCDashboard/elo_df.csv")
 
+create_elo_data <- function(k) {
 
-elo.run(winner ~ fighter + opponent, k = 20,
-        data = elo_df %>% arrange(fighter, date)) %>%
-    as_tibble()
+    temp_df <- elo.run(winner ~ fighter + opponent, k = 20,
+            data = elo_df %>% arrange(fighter, date)) %>%
+            as_tibble() %>%
+            cbind(elo_df %>% arrange(fighter, date) %>% select(match_id)) %>%
+            select(team.A, team.B, elo.A, elo.B, match_id)
+    
+    rbind(temp_df %>% select_at(vars(contains(".A"), contains("match_id"))) %>%
+        rename_all(.funs = function(x) str_replace(x, ".A", "")),
+        temp_df %>% select_at(vars(contains(".B"), contains("match_id"))) %>%
+        rename_all(.funs = function(x) str_replace(x, ".B", ""))) %>%
+        rename("fighter" = "team") %>%
+        left_join(df %>% select(fighter, date, weight_class, match_id),
+              by = c("fighter", "match_id"))
+
+}
 
 ui <- dashboardPage(
     dashboardHeader(title = "UFC Dashboard"),
