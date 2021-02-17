@@ -26,7 +26,7 @@ create_elo_data <- function(k) {
 
 }
 
-create_elo_data(20)
+create_elo_data(20) %>% colnames()
 
 ui <- dashboardPage(
     dashboardHeader(title = "UFC Dashboard"),
@@ -39,7 +39,7 @@ ui <- dashboardPage(
     dashboardBody(
         tabItems(
             tabItem(tabName = "weight_class_tab",
-                    box(plotOutput("elo_timeseries"))
+                    box(plotOutput("elo_timeseries")),
                     box(tableOutput("top_5_table")),
                     box(sliderInput(inputId = "v_k_1",
                                     label = "K for ELO",
@@ -69,6 +69,25 @@ server <- function(input, output) {
             select(fighter, elo) %>%
             mutate(rank = row_number())
             
+    })
+    
+    output$elo_timeseries <- renderPlot({
+        elo_timeseries_df <- create_elo_data(input$v_k_1)
+        
+        top_5_fighters <- elo_timeseries_df %>%
+            group_by(fighter) %>%
+            arrange(desc(elo)) %>%
+            slice(1) %>%
+            ungroup() %>%
+            top_n(elo, n = 5) %>%
+            select(fighter)
+        
+        ggplot(data = elo_timeseries_df, aes(x = date, y = elo)) + 
+            geom_point() + 
+            geom_point(data = elo_timeseries_df %>% filter(fighter %in% top_5_fighters$fighter),
+                       aes(x = date, y = elo, color = fighter)) +
+            theme(legend.position = "top")
+        
     })
     
 }
