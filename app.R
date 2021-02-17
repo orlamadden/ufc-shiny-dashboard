@@ -39,12 +39,14 @@ ui <- dashboardPage(
     dashboardBody(
         tabItems(
             tabItem(tabName = "weight_class_tab",
+                    box(plotOutput("elo_timeseries"))
+                    box(tableOutput("top_5_table")),
                     box(sliderInput(inputId = "v_k_1",
                                     label = "K for ELO",
                                     min = 1,
                                     max = 100,
-                                    value = 20)
-                        )),
+                                    value = 20))
+                    ),
             tabItem(tabName = "head_tab")
         )
     )
@@ -53,7 +55,21 @@ ui <- dashboardPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-    
+    output$top_5_table <- renderTable({
+        
+        table_df <- create_elo_data(input$v_k_1)
+        
+        table_df %>%
+            group_by(fighter) %>%
+            arrange(desc(elo)) %>%
+            slice(1) %>%
+            ungroup() %>%
+            top_n(elo, n = 5) %>%
+            arrange(desc(elo)) %>%
+            select(fighter, elo) %>%
+            mutate(rank = row_number())
+            
+    })
     
 }
 
